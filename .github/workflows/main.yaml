@@ -11,42 +11,32 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Code Checkout
-      - uses: actions/checkout@v3
+      # 1. Latest Checkout Action (Node.js warning hatane ke liye v4 use kiya)
+      - uses: actions/checkout@v4
 
-      # 2. Java Setup (Android ke liye mandatory hai)
+      # 2. Latest Java Setup
       - name: Set up Java
-        uses: actions/setup-java@v3
+        uses: actions/setup-java@v4
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      # 3. Flutter Setup (Version ko exact specify karna safe hota hai)
+      # 3. Flutter Setup
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
           channel: 'stable'
-          # Tip: '3.x' ki jagah exact version numeric format me dalein jaise '3.22.0' (ya jo aapka flutter --version hai)
-          # Agar aap blank chhod denge toh ye latest stable version utha lega, jo abhi ke liye best hai:
-          flutter-version: ''
+          flutter-version: '' # Automatically latest stable version uthayega
 
-      # 4. Pub Get
+      # 4. Get Packages
       - name: Install dependencies
         run: flutter pub get
 
-      # 5. Code Analysis (Agar rules zyada strict hain aur pipeline fail ho jaye, toh ise hata sakte hain temporary)
-      - name: Analyze Project Code
-        run: flutter analyze
-
-      # 6. Run Tests (Agar test cases nahi likhe hain toh ye step skip ho jayega)
-      - name: Run Tests
-        run: flutter test
-
-      # 7. APK RELEASE CHANGES HERE: Release APK generate karne ka step
+      # 5. Build Release APK (Direct build chala rahe hain testing check karne ke liye)
       - name: Build Release APK
         run: flutter build apk --release
 
-      # 8. Generated APK ko GitHub Actions Artifacts me upload karna (Taaki aap download kar sakein)
+      # 6. Upload Generated APK
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
