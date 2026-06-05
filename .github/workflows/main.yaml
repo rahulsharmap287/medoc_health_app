@@ -1,0 +1,43 @@
+name: Flutter CI/CD
+
+# Ye workflow tab chalega jab aap main branch me code push ya pull request karenge
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    # Hamein Ubuntu environment chahiye (Fast aur free hai)
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. GitHub repository se code checkout karna
+      - uses: actions/checkout@v3
+
+      # 2. Java setup karna (Android build ke liye zaroori hai)
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: 'zulu'
+          java-version: '17'
+
+      # 3. Flutter environment setup karna
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.x' # Ya jo bhi version aap use kar rahe hain
+          channel: 'stable'
+
+      # 4. Dependencies get karna
+      - name: Install dependencies
+        run: flutter pub get
+
+      # 5. Code Linter/Analyze chalana (Formatting aur errors check karne ke liye)
+      - name: Analyze Project Code
+        run: flutter analyze
+
+      # 6. Unit Tests run karna (Agar aapne tests likhe hain)
+      - name: Run Tests
+        run: flutter test
