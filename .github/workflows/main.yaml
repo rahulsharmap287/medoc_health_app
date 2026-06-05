@@ -1,6 +1,5 @@
 name: Flutter CI/CD
 
-# Ye workflow tab chalega jab aap main branch me code push ya pull request karenge
 on:
   push:
     branches: [ main ]
@@ -9,35 +8,47 @@ on:
 
 jobs:
   build:
-    # Hamein Ubuntu environment chahiye (Fast aur free hai)
     runs-on: ubuntu-latest
 
     steps:
-      # 1. GitHub repository se code checkout karna
+      # 1. Code Checkout
       - uses: actions/checkout@v3
 
-      # 2. Java setup karna (Android build ke liye zaroori hai)
+      # 2. Java Setup (Android ke liye mandatory hai)
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
           distribution: 'zulu'
           java-version: '17'
 
-      # 3. Flutter environment setup karna
+      # 3. Flutter Setup (Version ko exact specify karna safe hota hai)
       - name: Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.x' # Ya jo bhi version aap use kar rahe hain
           channel: 'stable'
+          # Tip: '3.x' ki jagah exact version numeric format me dalein jaise '3.22.0' (ya jo aapka flutter --version hai)
+          # Agar aap blank chhod denge toh ye latest stable version utha lega, jo abhi ke liye best hai:
+          flutter-version: ''
 
-      # 4. Dependencies get karna
+      # 4. Pub Get
       - name: Install dependencies
         run: flutter pub get
 
-      # 5. Code Linter/Analyze chalana (Formatting aur errors check karne ke liye)
+      # 5. Code Analysis (Agar rules zyada strict hain aur pipeline fail ho jaye, toh ise hata sakte hain temporary)
       - name: Analyze Project Code
         run: flutter analyze
 
-      # 6. Unit Tests run karna (Agar aapne tests likhe hain)
+      # 6. Run Tests (Agar test cases nahi likhe hain toh ye step skip ho jayega)
       - name: Run Tests
         run: flutter test
+
+      # 7. APK RELEASE CHANGES HERE: Release APK generate karne ka step
+      - name: Build Release APK
+        run: flutter build apk --release
+
+      # 8. Generated APK ko GitHub Actions Artifacts me upload karna (Taaki aap download kar sakein)
+      - name: Upload APK Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: production-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
